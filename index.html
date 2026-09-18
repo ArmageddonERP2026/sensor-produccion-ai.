@@ -24,7 +24,7 @@ button{border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}.
 </style>
 </head>
 <body>
-<header><div class="logo">📷 ERP AI · CÁMARA SENSOR V2</div><div class="pill" id="topState">DETENIDO</div></header>
+<header><div class="logo">📷 ERP AI · CÁMARA SENSOR V3</div><div class="pill" id="topState">DETENIDO</div></header>
 <main>
 <div class="grid">
 <section class="card">
@@ -69,7 +69,7 @@ button{border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}.
   <button id="testBtn" class="secondary">SIMULAR 1 CAJA</button>
 
   <div class="status" id="erpStatus">ERP: <span class="warn">modo local</span></div><div class="status" id="cameraDiag">Entorno cámara: verificando…</div>
-  <div class="small">Ingeniería V1: la cámara analiza una franja horizontal. Cuando el cambio visual cruza el umbral y ha pasado el tiempo mínimo desde la caja anterior, registra 1 caja. La velocidad se calcula con los timestamps reales de detección, no con la velocidad objetivo.</div>
+  <div class="small">Ingeniería V3: la cámara analiza una franja horizontal. Cuando el cambio visual cruza el umbral y ha pasado el tiempo mínimo desde la caja anterior, registra 1 caja. La velocidad se calcula con los timestamps reales de detección, no con la velocidad objetivo.</div>
   <div class="title" style="margin-top:6px">Telemetría</div>
   <div class="events" id="events"></div>
 </aside>
@@ -80,7 +80,7 @@ button{border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}.
 const $=id=>document.getElementById(id);
 const video=$('video'), overlay=$('overlay'), ctx=overlay.getContext('2d',{willReadFrequently:true});
 const hidden=document.createElement('canvas'), hctx=hidden.getContext('2d',{willReadFrequently:true});
-let stream=null, sensing=false, raf=0, prevStrip=null, lastDetect=0, timestamps=[], startAt=0, samples=[];
+let stream=null, sensing=false, raf=0, prevStrip=null, lastDetect=0, timestamps=[], startAt=0, samples=[], intervalMs=[], currentSpeed=0, lastGraphAt=0;
 let armed=true, motionEMA=0;
 
 function log(msg){
@@ -144,39 +144,59 @@ async function startCamera(){
 
 function detectBox(){
   const now=performance.now();
+  const prev=timestamps.length ? timestamps[timestamps.length-1] : null;
+  if(prev){
+    const dt=now-prev;
+    intervalMs.push(dt);
+    if(intervalMs.length>8) intervalMs.shift();
+    // Mediana de los últimos intervalos: estable ante una detección aislada anormal.
+    const sorted=[...intervalMs].sort((a,b)=>a-b);
+    const med=sorted[Math.floor(sorted.length/2)];
+    currentSpeed=med>0 ? 60000/med : 0;
+  }
   timestamps.push(now); lastDetect=now;
-  const keep=60000; timestamps=timestamps.filter(t=>now-t<=keep);
+  if(timestamps.length>5000) timestamps.shift();
   $('count').textContent=Number($('count').textContent)+1;
-  updateMetrics(now);
+  updateMetrics(now,true);
+
   const payload={
     type:'BOX_DETECTED', machine:$('machine').value, op:$('op').value.trim(),
     ts:new Date().toISOString(), count:Number($('count').textContent),
-    speed_cpm:Number($('speed').textContent), avg_cpm:Number($('avg').textContent)
+    speed_cpm:Math.round(currentSpeed), avg_cpm:Number($('avg').textContent),
+    interval_ms:prev ? Math.round(now-prev) : null, state:'RUN'
   };
   localStorage.setItem('erp_ai_sensor_latest',JSON.stringify(payload));
-  try{ new BroadcastChannel('erp_ai_sensor').postMessage(payload); }catch(e){}
+  try{ const bc=new BroadcastChannel('erp_ai_sensor'); bc.postMessage(payload); bc.close(); }catch(e){}
   log(`${payload.machine} · OP ${payload.op||'—'} · caja #${payload.count} · ${payload.speed_cpm} cpm`);
 }
 
-function updateMetrics(now=performance.now()){
-  const recent=timestamps.filter(t=>now-t<=10000);
-  let sp=0;
-  if(recent.length>=2){
-    const dt=(recent[recent.length-1]-recent[0])/1000;
-    sp=dt>0 ? ((recent.length-1)/dt)*60 : 0;
-  } else if(recent.length===1 && now-recent[0]<2000) sp=0;
-  if(now-lastDetect>2000) sp=0;
-  const elapsed=(now-startAt)/1000;
-  const avg=elapsed>0 ? (Number($('count').textContent)/elapsed)*60 : 0;
+function updateMetrics(now=performance.now(), forceGraph=false){
+  const n=timestamps.length;
+  // STOP dinámico: al menos 2 s; a baja velocidad permite hasta 3 intervalos recientes.
+  const recentInterval=intervalMs.length ? intervalMs[intervalMs.length-1] : 0;
+  const stopAfter=Math.max(2000, Math.min(10000, recentInterval*3 || 2000));
+  const running=n>0 && (now-lastDetect)<=stopAfter;
+  const sp=running ? currentSpeed : 0;
+
+  // Promedio productivo real: intervalos entre primera y última caja.
+  let avg=0;
+  if(n>=2){
+    const dt=(timestamps[n-1]-timestamps[0])/1000;
+    avg=dt>0 ? ((n-1)/dt)*60 : 0;
+  }
+
   $('speed').textContent=Math.round(sp);
   $('avg').textContent=Math.round(avg);
-  const running=(now-lastDetect<2000 && Number($('count').textContent)>0);
   $('runState').textContent=running?'RUN':'STOP';
   $('runState').className=running?'ok':'bad';
-  samples.push({t:elapsed,v:sp}); if(samples.length>240) samples.shift();
-  drawSpark();
-}
 
+  if(forceGraph || now-lastGraphAt>=500){
+    samples.push({t:(now-startAt)/1000,v:sp});
+    if(samples.length>360) samples.shift();
+    lastGraphAt=now;
+    drawSpark();
+  }
+}
 function drawSpark(){
   const c=$('spark'), r=c.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2);
   if(c.width!==Math.round(r.width*dpr)||c.height!==Math.round(r.height*dpr)){c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr)}
@@ -222,7 +242,7 @@ function loop(){
 }
 function startSensor(){
   if(!$('op').value.trim() && !confirm('No hay OP capturada. ¿Iniciar sensor de todos modos?'))return;
-  sensing=true; startAt=performance.now(); lastDetect=0; timestamps=[]; samples=[]; prevStrip=null; armed=true;
+  sensing=true; startAt=performance.now(); lastDetect=0; timestamps=[]; samples=[]; intervalMs=[]; currentSpeed=0; lastGraphAt=0; prevStrip=null; armed=true;
   $('count').textContent='0'; $('speed').textContent='0'; $('avg').textContent='0';
   $('sensorBtn').disabled=true;$('stopBtn').disabled=false;$('topState').textContent='SENSOR ACTIVO';
   log('Sensor iniciado · '+$('machine').value+' · OP '+($('op').value||'—')); loop();
@@ -240,4 +260,4 @@ $('cameraBtn').onclick=startCamera;$('sensorBtn').onclick=startSensor;$('stopBtn
 })();
 </script>
 </body>
-                         </html>
+</html>
