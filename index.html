@@ -120,6 +120,7 @@ async function startCamera(){
     video.srcObject=stream;
     video.setAttribute('playsinline','');
     await video.play();
+    alert('CAMARA: '+video.videoWidth+' x '+video.videoHeight);
     resize();
     $('cameraBtn').disabled=true;
     $('cameraBtn').textContent='✓ CÁMARA ACTIVA';
