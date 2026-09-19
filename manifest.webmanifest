@@ -1,0 +1,12 @@
+{
+  "name": "ERP AI Cámara Sensor",
+  "short_name": "Sensor ERP",
+  "id": "erp-ai-sensor",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "description": "Cámara sensor para conteo de cajas y velocidad real del ERP Producción AI"
+}
