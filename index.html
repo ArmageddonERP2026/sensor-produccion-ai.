@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07111f">
-<title>ERP Producción AI · Cámara Sensor V5</title>
+<title>ERP AI · Sensor de Producción</title>
 
 <style>
 :root{
@@ -17,66 +17,84 @@
   --green:#29d17d;
   --red:#ff5364;
 }
-*{box-sizing:border-box}
-body{
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
   margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
   background:var(--bg);
   color:var(--txt);
   font-family:Arial,sans-serif;
+  overflow-x:hidden;
 }
+
+body{
+  min-height:100vh;
+}
+
 header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  display:flex;
-  align-items:center;
-  padding:12px 14px;
+  width:100%;
+  padding:15px 16px;
   background:#091522;
   border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
+
 .logo{
-  font-weight:900;
   font-size:18px;
+  font-weight:900;
 }
-.pill{
-  margin-left:auto;
+
+.state{
   border:1px solid var(--line);
   border-radius:999px;
-  padding:8px 14px;
+  padding:8px 12px;
+  font-size:12px;
   color:var(--muted);
-  font-size:13px;
+  white-space:nowrap;
 }
+
 main{
-  max-width:1200px;
-  margin:auto;
-  padding:14px;
+  width:100%;
+  max-width:600px;
+  margin:0 auto;
+  padding:12px;
 }
-.grid{
-  display:grid;
-  grid-template-columns:1.45fr .8fr;
-  gap:14px;
-}
+
 .card{
+  width:100%;
   background:var(--card);
   border:1px solid var(--line);
   border-radius:16px;
   padding:14px;
-}
-.title{
-  font-size:18px;
-  font-weight:900;
   margin-bottom:12px;
 }
+
+h2{
+  margin:0 0 12px;
+  font-size:19px;
+}
+
 .camera{
   position:relative;
   width:100%;
-  aspect-ratio:16/9;
-  background:#02070d;
-  overflow:hidden;
-  border-radius:14px;
+  aspect-ratio:3/4;
+  max-height:62vh;
+  background:#000;
   border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
 }
-#video{
+
+video{
   position:absolute;
   inset:0;
   width:100%;
@@ -84,126 +102,184 @@ main{
   object-fit:cover;
   background:#000;
 }
-#overlay{
+
+canvas{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
   pointer-events:none;
 }
-.lineLabel{
+
+.badge{
   position:absolute;
-  left:10px;
   top:10px;
-  z-index:4;
-  background:#001c20cc;
-  color:#8ffff0;
-  padding:6px 9px;
+  left:10px;
+  z-index:5;
+  background:#003437;
+  color:#7ffff8;
+  padding:7px 9px;
   border-radius:8px;
+  font-size:12px;
   font-weight:bold;
-  font-size:13px;
 }
+
+.line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:55%;
+  height:3px;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+  z-index:4;
+}
+
 .signal{
   position:absolute;
   left:10px;
-  z-index:4;
-  background:#00131dcc;
-  padding:5px 8px;
-  font-size:12px;
+  top:calc(55% + 10px);
+  z-index:5;
+  background:rgba(0,20,30,.85);
+  padding:6px 8px;
+  font-size:11px;
+  border-radius:4px;
 }
-.controls{
-  display:grid;
-  gap:12px;
+
+.field{
+  margin-bottom:16px;
 }
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
+
 label{
   display:block;
   color:var(--muted);
-  margin-bottom:6px;
   font-size:13px;
+  margin-bottom:7px;
 }
-select,input[type=text]{
+
+input,
+select{
   width:100%;
+  padding:13px;
   background:#091522;
-  color:white;
+  color:var(--txt);
   border:1px solid var(--line);
   border-radius:12px;
-  padding:13px;
   font-size:16px;
 }
-.range{
-  display:flex;
+
+input[type=range]{
+  padding:0;
+  accent-color:#168cff;
+}
+
+.rangeRow{
+  display:grid;
+  grid-template-columns:1fr 65px;
   align-items:center;
   gap:10px;
 }
-.range input{flex:1}
+
 .value{
-  min-width:58px;
   text-align:right;
+  font-size:16px;
+  font-weight:bold;
 }
+
 button{
   width:100%;
   border:0;
   border-radius:12px;
-  padding:15px;
-  font-weight:900;
+  padding:15px 12px;
+  margin-top:9px;
   font-size:15px;
+  font-weight:900;
+  cursor:pointer;
 }
+
 .primary{
   background:var(--cyan);
-  color:#002120;
+  color:#001b20;
 }
+
 .secondary{
-  background:#172a3d;
-  color:white;
+  background:#15283a;
+  color:var(--txt);
+  border:1px solid var(--line);
 }
+
 .danger{
-  background:var(--red);
-  color:white;
+  background:#3a1720;
+  color:#ff9aa5;
 }
+
 button:disabled{
   opacity:.4;
 }
-.stats{
+
+.metrics{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:1fr 1fr;
   gap:10px;
   margin-top:12px;
 }
-.stat{
+
+.metric{
   background:#091522;
   border:1px solid var(--line);
   border-radius:12px;
   padding:12px;
 }
-.big{
-  font-size:28px;
-  font-weight:900;
+
+.metric span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
 }
-.small{
+
+.metric strong{
+  display:block;
+  margin-top:5px;
+  font-size:21px;
+}
+
+.status{
+  margin-top:12px;
+  padding:10px;
+  background:#091522;
+  border:1px solid var(--line);
+  border-radius:10px;
   color:var(--muted);
   font-size:12px;
 }
-#events{
-  margin-top:12px;
-  height:120px;
-  overflow:auto;
-  background:#07111f;
-  border-radius:10px;
-  padding:8px;
-  font-family:monospace;
-  font-size:11px;
+
+.ok{
+  color:var(--green);
 }
-.event{
-  padding:4px;
-  border-bottom:1px solid #16283a;
+
+.bad{
+  color:var(--red);
 }
-@media(max-width:800px){
-  .grid{grid-template-columns:1fr}
+
+/* IMPORTANTE:
+   Nunca convertir la interfaz a dos columnas en móvil */
+@media (max-width:900px){
+  main{
+    display:block !important;
+    width:100% !important;
+    max-width:600px !important;
+  }
+
+  .card{
+    width:100% !important;
+  }
+}
+
+/* Escritorio solamente */
+@media (min-width:901px){
+  main{
+    max-width:600px;
+  }
 }
 </style>
 </head>
@@ -211,93 +287,131 @@ button:disabled{
 <body>
 
 <header>
-  <div class="logo">📷 ERP AI · CÁMARA SENSOR V5</div>
-  <div class="pill" id="topState">DETENIDO</div>
+  <div class="logo">📷 ERP AI · SENSOR V6</div>
+  <div class="state" id="topState">DETENIDO</div>
 </header>
 
 <main>
-<div class="grid">
 
 <section class="card">
-  <div class="title">Detección óptica de cajas</div>
+  <h2>Detección óptica de cajas</h2>
 
   <div class="camera" id="cameraBox">
     <video id="video" autoplay playsinline muted></video>
     <canvas id="overlay"></canvas>
 
-    <div class="lineLabel">LÍNEA VIRTUAL DE CONTEO</div>
-    <div class="signal" id="signal">Señal: 0.0 / umbral 28</div>
-  </div>
-
-  <div class="stats">
-    <div class="stat">
-      <div class="small">Cajas detectadas</div>
-      <div class="big" id="count">0</div>
+    <div class="badge">
+      LÍNEA VIRTUAL DE CONTEO
     </div>
-    <div class="stat">
-      <div class="small">Velocidad</div>
-      <div class="big"><span id="speed">0</span> <small>cpm</small></div>
+
+    <div class="line" id="virtualLine"></div>
+
+    <div class="signal" id="signal">
+      Señal: 0.0 / umbral 28
     </div>
   </div>
 
-  <div id="events"></div>
+  <div class="metrics">
+    <div class="metric">
+      <span>CAJAS DETECTADAS</span>
+      <strong id="count">0</strong>
+    </div>
+
+    <div class="metric">
+      <span>SEÑAL</span>
+      <strong id="signalValue">0.0</strong>
+    </div>
+  </div>
 </section>
 
-<aside class="card controls">
+<section class="card">
 
-  <div class="title">Configuración del nodo</div>
+  <h2>Configuración del nodo</h2>
 
-  <div class="row">
-    <div>
-      <label>Máquina</label>
-      <select id="machine">
-        <option>Flexo 1</option>
-        <option>Flexo 2</option>
-        <option>Troqueladora</option>
-        <option>Pegadora</option>
-      </select>
-    </div>
-
-    <div>
-      <label>OP activa</label>
-      <input id="op" type="text" placeholder="Ej. 1021">
-    </div>
+  <div class="field">
+    <label>Máquina</label>
+    <select id="machine">
+      <option>Flexo 1</option>
+      <option>Flexo 2</option>
+      <option>Troqueladora</option>
+      <option>Pegadora</option>
+    </select>
   </div>
 
-  <div>
+  <div class="field">
+    <label>OP activa</label>
+    <input
+      id="op"
+      type="text"
+      inputmode="numeric"
+      placeholder="Ej. 1021">
+  </div>
+
+  <div class="field">
     <label>Posición de línea de detección</label>
-    <div class="range">
-      <input id="lineY" type="range" min="10" max="90" value="55">
-      <span class="value"><span id="lineYV">55</span>%</span>
+
+    <div class="rangeRow">
+      <input
+        id="lineY"
+        type="range"
+        min="15"
+        max="85"
+        value="55">
+
+      <div class="value" id="lineValue">55%</div>
     </div>
   </div>
 
-  <div>
+  <div class="field">
     <label>Sensibilidad</label>
-    <div class="range">
-      <input id="threshold" type="range" min="5" max="80" value="28">
-      <span class="value" id="thresholdV">28</span>
+
+    <div class="rangeRow">
+      <input
+        id="threshold"
+        type="range"
+        min="5"
+        max="100"
+        value="28">
+
+      <div class="value" id="thresholdValue">28</div>
     </div>
   </div>
 
-  <div>
+  <div class="field">
     <label>Separación mínima entre cajas</label>
-    <div class="range">
-      <input id="cooldown" type="range" min="100" max="2000" step="20" value="500">
-      <span class="value"><span id="cooldownV">500</span> ms</span>
+
+    <div class="rangeRow">
+      <input
+        id="delay"
+        type="range"
+        min="100"
+        max="2000"
+        step="50"
+        value="500">
+
+      <div class="value" id="delayValue">500 ms</div>
     </div>
   </div>
 
-  <button class="primary" id="cameraBtn">1 · ACTIVAR CÁMARA</button>
-  <button class="secondary" id="sensorBtn" disabled>2 · INICIAR SENSOR</button>
-  <button class="danger" id="stopBtn" disabled>DETENER SENSOR</button>
+  <button class="primary" id="cameraBtn">
+    1 · ABRIR CÁMARA
+  </button>
 
-</aside>
+  <button class="secondary" id="sensorBtn" disabled>
+    2 · INICIAR SENSOR
+  </button>
 
-</div>
+  <button class="danger" id="stopBtn">
+    DETENER
+  </button>
+
+  <div class="status" id="status">
+    Cámara: esperando autorización
+  </div>
+
+</section>
+
 </main>
-
-<canvas id="hidden" style="display:none"></canvas>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -306,272 +420,367 @@ const video = $('video');
 const overlay = $('overlay');
 const ctx = overlay.getContext('2d');
 
-const hidden = $('hidden');
-const hctx = hidden.getContext('2d', {willReadFrequently:true});
-
 let stream = null;
 let sensing = false;
-let raf = 0;
+let animationId = null;
 
-let prevStrip = null;
-let motionEMA = 0;
-let lastDetect = 0;
 let count = 0;
-let timestamps = [];
+let previousSignal = 0;
+let lastDetection = 0;
 
-function log(text){
-  const d=document.createElement('div');
-  d.className='event';
-  d.textContent=new Date().toLocaleTimeString()+' · '+text;
-  $('events').prepend(d);
+function resizeCanvas(){
+  const rect = $('cameraBox').getBoundingClientRect();
+
+  overlay.width = Math.max(
+    1,
+    Math.round(rect.width * devicePixelRatio)
+  );
+
+  overlay.height = Math.max(
+    1,
+    Math.round(rect.height * devicePixelRatio)
+  );
 }
 
-function resizeOverlay(){
-  const r=$('cameraBox').getBoundingClientRect();
-  const dpr=window.devicePixelRatio||1;
+window.addEventListener('resize',resizeCanvas);
 
-  overlay.width=Math.round(r.width*dpr);
-  overlay.height=Math.round(r.height*dpr);
-  overlay.style.width=r.width+'px';
-  overlay.style.height=r.height+'px';
-
-  drawOverlay();
-}
-
-function drawOverlay(){
-  const dpr=window.devicePixelRatio||1;
-  const w=overlay.width;
-  const h=overlay.height;
-  const y=h*(Number($('lineY').value)/100);
-
-  ctx.clearRect(0,0,w,h);
-
-  ctx.strokeStyle='#12d8d0';
-  ctx.lineWidth=3*dpr;
-  ctx.beginPath();
-  ctx.moveTo(0,y);
-  ctx.lineTo(w,y);
-  ctx.stroke();
-
-  $('signal').style.top=
-    Math.min(
-      $('cameraBox').clientHeight-32,
-      $('cameraBox').clientHeight*(Number($('lineY').value)/100)+8
-    )+'px';
-}
-
-$('lineY').oninput=()=>{
-  $('lineYV').textContent=$('lineY').value;
-  drawOverlay();
+$('lineY').oninput = function(){
+  $('lineValue').textContent = this.value + '%';
+  $('virtualLine').style.top = this.value + '%';
+  $('signal').style.top =
+    'calc(' + this.value + '% + 10px)';
 };
 
-$('threshold').oninput=()=>{
-  $('thresholdV').textContent=$('threshold').value;
+$('threshold').oninput = function(){
+  $('thresholdValue').textContent = this.value;
 };
 
-$('cooldown').oninput=()=>{
-  $('cooldownV').textContent=$('cooldown').value;
+$('delay').oninput = function(){
+  $('delayValue').textContent =
+    this.value + ' ms';
 };
 
 async function startCamera(){
 
-  const btn=$('cameraBtn');
-  btn.disabled=true;
-  btn.textContent='ABRIENDO CÁMARA...';
+  $('cameraBtn').disabled = true;
+  $('cameraBtn').textContent =
+    'ABRIENDO CÁMARA...';
+
+  $('status').textContent =
+    'Solicitando permiso de cámara...';
 
   try{
 
     if(stream){
-      stream.getTracks().forEach(t=>t.stop());
+      stream.getTracks().forEach(
+        track => track.stop()
+      );
     }
 
-    stream=await navigator.mediaDevices.getUserMedia({
-      audio:false,
-      video:{
-        facingMode:{ideal:'environment'},
-        width:{ideal:1280},
-        height:{ideal:720}
-      }
-    });
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+        audio:false,
 
-    video.srcObject=stream;
+        video:{
+          facingMode:{
+            ideal:'environment'
+          },
+
+          width:{
+            ideal:1280
+          },
+
+          height:{
+            ideal:720
+          }
+        }
+      });
+
+    video.srcObject = stream;
 
     await video.play();
 
-    await new Promise(resolve=>{
-      if(video.videoWidth>0) resolve();
-      else video.onloadedmetadata=resolve;
-    });
+    resizeCanvas();
 
-    hidden.width=320;
-    hidden.height=180;
+    $('cameraBtn').textContent =
+      '✓ CÁMARA ACTIVA';
 
-    resizeOverlay();
+    $('sensorBtn').disabled = false;
 
-    btn.textContent='✓ CÁMARA ACTIVA';
-    btn.disabled=false;
+    $('topState').textContent =
+      'CÁMARA ACTIVA';
 
-    $('sensorBtn').disabled=false;
-    $('topState').textContent='CÁMARA ACTIVA';
+    $('status').innerHTML =
+      'Cámara: <span class="ok">ACTIVA</span>' +
+      '<br>' +
+      video.videoWidth +
+      ' × ' +
+      video.videoHeight;
 
-    log(
-      'Cámara activa · '+
-      video.videoWidth+' × '+video.videoHeight
-    );
+  }catch(error){
 
-  }catch(e){
+    console.error(error);
 
-    console.error(e);
+    $('cameraBtn').disabled = false;
 
-    btn.disabled=false;
-    btn.textContent='REINTENTAR CÁMARA';
+    $('cameraBtn').textContent =
+      'REINTENTAR CÁMARA';
 
-    $('topState').textContent='ERROR CÁMARA';
+    $('topState').textContent =
+      'ERROR';
 
-    log('ERROR cámara: '+e.name+' · '+e.message);
-
-    alert(
-      'No se pudo abrir la cámara.\n\n'+
-      e.name+'\n'+e.message
-    );
+    $('status').innerHTML =
+      '<span class="bad">ERROR DE CÁMARA</span><br>' +
+      error.name +
+      ': ' +
+      error.message;
   }
 }
 
-function detectFrame(){
-
-  if(video.readyState<2) return;
-
-  /*
-   IMPORTANTE:
-   Aquí NO rotamos el video.
-   Se procesa exactamente la misma imagen
-   que Chrome entrega y muestra.
-  */
-  hctx.drawImage(
-    video,
-    0,0,
-    hidden.width,
-    hidden.height
-  );
-
-  const yPct=Number($('lineY').value)/100;
-  const y=Math.floor(hidden.height*yPct);
-
-  const band=10;
-
-  const img=hctx.getImageData(
-    0,
-    Math.max(0,y-Math.floor(band/2)),
-    hidden.width,
-    band
-  ).data;
-
-  const gray=new Uint8Array(hidden.width*band);
-
-  for(let i=0,j=0;i<img.length;i+=4,j++){
-    gray[j]=(
-      img[i]*0.299+
-      img[i+1]*0.587+
-      img[i+2]*0.114
-    )|0;
-  }
-
-  let motion=0;
-
-  if(prevStrip){
-    for(let i=0;i<gray.length;i++){
-      motion+=Math.abs(gray[i]-prevStrip[i]);
-    }
-    motion/=gray.length;
-  }
-
-  prevStrip=gray;
-
-  motionEMA=motionEMA*0.65+motion*0.35;
-
-  const threshold=Number($('threshold').value);
-  const cooldown=Number($('cooldown').value);
-  const now=performance.now();
-
-  $('signal').textContent=
-    'Señal: '+motionEMA.toFixed(1)+
-    ' / umbral '+threshold;
+function calculateSignal(){
 
   if(
-    motionEMA>=threshold &&
-    now-lastDetect>=cooldown
+    video.readyState < 2 ||
+    !video.videoWidth ||
+    !video.videoHeight
   ){
-    lastDetect=now;
-    count++;
-    timestamps.push(now);
-
-    $('count').textContent=count;
-
-    log('Caja detectada #'+count);
+    return 0;
   }
 
-  timestamps=timestamps.filter(t=>now-t<60000);
-  $('speed').textContent=timestamps.length;
+  const w = overlay.width;
+  const h = overlay.height;
+
+  if(!w || !h){
+    return 0;
+  }
+
+  ctx.clearRect(0,0,w,h);
+
+  /*
+    El video se analiza directamente.
+    NO se rota la interfaz.
+  */
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    w,
+    h
+  );
+
+  const percent =
+    Number($('lineY').value) / 100;
+
+  const y =
+    Math.min(
+      h - 3,
+      Math.max(
+        0,
+        Math.round(h * percent)
+      )
+    );
+
+  const sampleHeight =
+    Math.min(6,h-y);
+
+  if(sampleHeight <= 0){
+    return 0;
+  }
+
+  const data =
+    ctx.getImageData(
+      0,
+      y,
+      w,
+      sampleHeight
+    ).data;
+
+  let total = 0;
+  let pixels = 0;
+
+  for(
+    let i=0;
+    i<data.length;
+    i+=16
+  ){
+
+    const r=data[i];
+    const g=data[i+1];
+    const b=data[i+2];
+
+    const brightness =
+      (r+g+b)/3;
+
+    total += brightness;
+    pixels++;
+  }
+
+  if(!pixels){
+    return 0;
+  }
+
+  return total/pixels;
 }
 
-function loop(){
-  if(!sensing) return;
+function sensorLoop(time){
 
-  detectFrame();
-  drawOverlay();
+  if(!sensing){
+    return;
+  }
 
-  raf=requestAnimationFrame(loop);
+  const current =
+    calculateSignal();
+
+  const difference =
+    Math.abs(
+      current -
+      previousSignal
+    );
+
+  previousSignal =
+    previousSignal * 0.75 +
+    current * 0.25;
+
+  const threshold =
+    Number(
+      $('threshold').value
+    );
+
+  const delay =
+    Number(
+      $('delay').value
+    );
+
+  $('signalValue').textContent =
+    difference.toFixed(1);
+
+  $('signal').textContent =
+    'Señal: ' +
+    difference.toFixed(1) +
+    ' / umbral ' +
+    threshold;
+
+  if(
+    difference > threshold &&
+    time-lastDetection > delay
+  ){
+
+    count++;
+
+    $('count').textContent =
+      count;
+
+    lastDetection = time;
+
+    $('status').innerHTML =
+      '<span class="ok">' +
+      'CAJA DETECTADA · TOTAL ' +
+      count +
+      '</span>';
+  }
+
+  animationId =
+    requestAnimationFrame(
+      sensorLoop
+    );
 }
 
 function startSensor(){
 
   if(!stream){
-    alert('Primero activa la cámara.');
+    alert(
+      'Primero abre la cámara.'
+    );
     return;
   }
 
-  sensing=true;
-  prevStrip=null;
-  motionEMA=0;
+  if(!$('op').value.trim()){
 
-  $('sensorBtn').disabled=true;
-  $('stopBtn').disabled=false;
-  $('topState').textContent='SENSOR ACTIVO';
+    const continuar =
+      confirm(
+        'No ingresaste una OP. ¿Iniciar de todas formas?'
+      );
 
-  log(
-    'Sensor iniciado · '+
-    $('machine').value+
-    ($('op').value.trim()
-      ? ' · OP '+$('op').value.trim()
-      : '')
-  );
+    if(!continuar){
+      return;
+    }
+  }
 
-  cancelAnimationFrame(raf);
-  loop();
+  sensing = true;
+
+  count = 0;
+
+  previousSignal = 0;
+
+  lastDetection = 0;
+
+  $('count').textContent = '0';
+
+  $('sensorBtn').disabled = true;
+
+  $('cameraBtn').disabled = true;
+
+  $('topState').textContent =
+    'SENSOR ACTIVO';
+
+  $('status').innerHTML =
+    '<span class="ok">' +
+    'SENSOR EN PRODUCCIÓN' +
+    '</span>';
+
+  animationId =
+    requestAnimationFrame(
+      sensorLoop
+    );
 }
 
-function stopSensor(){
+function stopEverything(){
 
-  sensing=false;
-  cancelAnimationFrame(raf);
+  sensing = false;
 
-  $('sensorBtn').disabled=false;
-  $('stopBtn').disabled=true;
-  $('topState').textContent='CÁMARA ACTIVA';
+  if(animationId){
+    cancelAnimationFrame(
+      animationId
+    );
+  }
 
-  log('Sensor detenido');
+  if(stream){
+    stream
+      .getTracks()
+      .forEach(
+        track => track.stop()
+      );
+  }
+
+  stream = null;
+
+  video.srcObject = null;
+
+  $('cameraBtn').disabled = false;
+
+  $('cameraBtn').textContent =
+    '1 · ABRIR CÁMARA';
+
+  $('sensorBtn').disabled = true;
+
+  $('topState').textContent =
+    'DETENIDO';
+
+  $('status').textContent =
+    'Sensor detenido';
 }
 
-$('cameraBtn').onclick=startCamera;
-$('sensorBtn').onclick=startSensor;
-$('stopBtn').onclick=stopSensor;
+$('cameraBtn').onclick =
+  startCamera;
 
-window.addEventListener('resize',resizeOverlay);
-window.addEventListener('orientationchange',()=>{
-  setTimeout(resizeOverlay,300);
-});
+$('sensorBtn').onclick =
+  startSensor;
 
-resizeOverlay();
+$('stopBtn').onclick =
+  stopEverything;
+
+resizeCanvas();
 </script>
 
 </body>
