@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prueba de cámara</title>
+
+<style>
+body{
+  margin:0;
+  background:#07111f;
+  color:white;
+  font-family:Arial,sans-serif;
+  padding:20px;
+}
+h2{margin-top:0}
+button{
+  width:100%;
+  padding:18px;
+  font-size:18px;
+  font-weight:bold;
+  border:0;
+  border-radius:12px;
+  background:#12d8d0;
+  color:#001b20;
+}
+video{
+  display:block;
+  width:100%;
+  margin-top:20px;
+  background:black;
+  border-radius:12px;
+}
+#info{
+  margin-top:15px;
+  padding:12px;
+  background:#102238;
+  border-radius:10px;
+  white-space:pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<h2>PRUEBA DIRECTA DE CÁMARA</h2>
+
+<button id="btn">ABRIR CÁMARA</button>
+
+<video id="video" autoplay muted playsinline></video>
+
+<div id="info">Esperando prueba...</div>
+
+<script>
+const btn = document.getElementById("btn");
+const video = document.getElementById("video");
+const info = document.getElementById("info");
+
+btn.onclick = async () => {
+
+  info.textContent = "Solicitando cámara...";
+
+  try {
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+      throw new Error("getUserMedia NO disponible");
+    }
+
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" }
+        },
+        audio: false
+      });
+
+    video.srcObject = stream;
+
+    await video.play();
+
+    info.textContent =
+      "CÁMARA OK\n" +
+      "Resolución: " +
+      video.videoWidth +
+      " x " +
+      video.videoHeight;
+
+    btn.textContent = "CÁMARA ACTIVA";
+
+  } catch (e) {
+
+    info.textContent =
+      "ERROR\n" +
+      "Nombre: " + e.name +
+      "\nMensaje: " + e.message;
+
+  }
+};
+</script>
+
+</body>
+</html>
